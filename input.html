@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Hill Cipher Input</title>
+<link rel="stylesheet" href="style.css">
+
+
+  <style>
+    .matrix { display: grid; gap: 5px; margin-top: 10px; }
+    .matrix-2 { grid-template-columns: repeat(2, 40px); }
+    .matrix-3 { grid-template-columns: repeat(3, 40px); }
+  </style>
+</head>
+<body>
+  <h1>Hill Cipher - Input</h1>
+
+  <label for="message">Message (A-Z only):</label>
+  <input type="text" id="message" placeholder="HELLO"><br><br>
+
+  <label>Select Matrix Size:</label><br>
+  <input type="radio" name="matrixSize" value="2" onclick="renderMatrix(2)"> 2x2<br>
+  <input type="radio" name="matrixSize" value="3" onclick="renderMatrix(3)" checked> 3x3<br><br>
+
+  <div id="matrixContainer"></div>
+
+  <br>
+  <button onclick="submitInput()">Proceed</button>
+
+  <script>
+    function renderMatrix(n) {
+      const container = document.getElementById("matrixContainer");
+      container.innerHTML = `<strong>Enter Key Matrix (${n}x${n}):</strong><br>`;
+      const matrixDiv = document.createElement("div");
+      matrixDiv.className = `matrix matrix-${n}`;
+
+      for (let i = 0; i < n * n; i++) {
+        const input = document.createElement("input");
+        input.type = "number";
+        input.className = "key-input";
+        input.min = 0;
+        input.max = 25;
+        input.required = true;
+        matrixDiv.appendChild(input);
+      }
+      container.appendChild(matrixDiv);
+    }
+
+    // Render default 3x3 matrix on page load
+    window.onload = () => renderMatrix(3);
+
+    function submitInput() {
+      const message = document.getElementById("message").value.toUpperCase().replace(/[^A-Z]/g, '');
+      const size = parseInt(document.querySelector('input[name="matrixSize"]:checked').value);
+      const keyInputs = Array.from(document.querySelectorAll(".key-input"));
+      const key = keyInputs.map(input => parseInt(input.value));
+
+      if (!message || key.includes(NaN) || key.length !== size * size) {
+        alert("Please enter a valid message and complete matrix.");
+        return;
+      }
+
+      // Pad message if necessary
+      while (message.length < size) {
+        message += 'X';
+      }
+
+      sessionStorage.setItem("message", message);
+      sessionStorage.setItem("matrixSize", size.toString());
+      sessionStorage.setItem("key", JSON.stringify(key));
+
+      window.location.href = "animation.html";
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Calculation Steps</title>
+<link rel="stylesheet" href="style.css">
+
+  <style>
+    body { font-family: monospace; padding: 20px; }
+    button { margin-top: 20px; padding: 8px 16px; }
+  </style>
+</head>
+<body>
+  <h2>Encryption and Decryption Steps</h2>
+  <pre id="steps"></pre>
+  <button onclick="goToResult()">Continue</button>
+
+  <script>
+    const message = sessionStorage.getItem('message');
+    const key = JSON.parse(sessionStorage.getItem('key'));
+    const n = parseInt(sessionStorage.getItem('matrixSize'));
+
+    if (!message || !key || !n) {
+      alert("Missing data. Please start from input page.");
+      window.location.href = "input.html";
+    }
+
+    const steps = [];
+
+    // Convert message to numbers
+    const msgNums = Array.from(message).map(c => c.charCodeAt(0) - 65);
+    steps.push(`Matrix Size: ${n} x ${n}`);
+    steps.push(`Original Message: ${message}`);
+    steps.push(`Message Vector: [${msgNums.join(', ')}]`);
+
+    steps.push(`\nKey Matrix:`);
+    for (let i = 0; i < n; i++) {
+      steps.push(key.slice(i * n, i * n + n).join('\t'));
+    }
+
+    // Encrypt
+    const encrypted = [];
+    for (let i = 0; i < n; i++) {
+      let sum = 0, detail = [];
+      for (let j = 0; j < n; j++) {
+        sum += key[i * n + j] * msgNums[j];
+        detail.push(`${key[i * n + j]}*${msgNums[j]}`);
+      }
+      let modSum = sum % 26;
+      encrypted.push(modSum);
+      steps.push(`Row ${i + 1}: ${detail.join(' + ')} = ${sum} ≡ ${modSum} (mod 26)`);
+    }
+
+    const encryptedText = encrypted.map(x => String.fromCharCode(x + 65)).join('');
+    steps.push(`\nEncrypted Vector: [${encrypted.join(', ')}]`);
+    steps.push(`Encrypted Text: ${encryptedText}`);
+    sessionStorage.setItem('encryptedText', encryptedText);
+
+    // Decryption
+    function modInverse(a, m) {
+      a = ((a % m) + m) % m;
+      for (let x = 1; x < m; x++) {
+        if ((a * x) % m === 1) return x;
+      }
+      return null;
+    }
+
+    function inverseMatrix(matrix, size) {
+      if (size === 2) {
+        const det = matrix[0] * matrix[3] - matrix[1] * matrix[2];
+        const detMod = ((det % 26) + 26) % 26;
+        const detInv = modInverse(detMod, 26);
+        if (detInv === null) return null;
+        return [
+          (detInv * matrix[3]) % 26,
+          (-detInv * matrix[1] + 26) % 26,
+          (-detInv * matrix[2] + 26) % 26,
+          (detInv * matrix[0]) % 26
+        ];
+      } else if (size === 3) {
+        const det =
+          matrix[0] * (matrix[4] * matrix[8] - matrix[5] * matrix[7]) -
+          matrix[1] * (matrix[3] * matrix[8] - matrix[5] * matrix[6]) +
+          matrix[2] * (matrix[3] * matrix[7] - matrix[4] * matrix[6]);
+
+        const detMod = ((det % 26) + 26) % 26;
+        const detInv = modInverse(detMod, 26);
+        if (detInv === null) return null;
+
+        const adj = [
+          matrix[4]*matrix[8] - matrix[5]*matrix[7],
+          -(matrix[1]*matrix[8] - matrix[2]*matrix[7]),
+          matrix[1]*matrix[5] - matrix[2]*matrix[4],
+          -(matrix[3]*matrix[8] - matrix[5]*matrix[6]),
+          matrix[0]*matrix[8] - matrix[2]*matrix[6],
+          -(matrix[0]*matrix[5] - matrix[2]*matrix[3]),
+          matrix[3]*matrix[7] - matrix[4]*matrix[6],
+          -(matrix[0]*matrix[7] - matrix[1]*matrix[6]),
+          matrix[0]*matrix[4] - matrix[1]*matrix[3]
+        ];
+
+        return adj.map(x => ((detInv * x) % 26 + 26) % 26);
+      }
+      return null;
+    }
+
+    const invKey = inverseMatrix(key, n);
+    if (invKey) {
+      const decrypted = [];
+      for (let i = 0; i < n; i++) {
+        let sum = 0, detail = [];
+        for (let j = 0; j < n; j++) {
+          sum += invKey[i * n + j] * encrypted[j];
+          detail.push(`${invKey[i * n + j]}*${encrypted[j]}`);
+        }
+        let modSum = sum % 26;
+        decrypted.push(modSum);
+        steps.push(`\nDecrypt Row ${i + 1}: ${detail.join(' + ')} = ${sum} ≡ ${modSum} (mod 26)`);
+      }
+
+      const decryptedText = decrypted.map(x => String.fromCharCode(x + 65)).join('');
+      steps.push(`\nDecrypted Vector: [${decrypted.join(', ')}]`);
+      steps.push(`Decrypted Text: ${decryptedText}`);
+      sessionStorage.setItem('decryptedText', decryptedText);
+    } else {
+      steps.push(`\nDecryption failed: Key matrix is not invertible mod 26.`);
+      sessionStorage.setItem('decryptedText', "N/A");
+    }
+
+    document.getElementById("steps").textContent = steps.join('\n');
+
+    function goToResult() {
+      window.location.href = "result.html";
+    }
+  </script>
+</body>
+</html>

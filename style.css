@@ -1,0 +1,45 @@
+body {
+  background: linear-gradient(to right, #83a4d4, #b6fbff);
+  font-family: Arial, sans-serif;
+  background: linear-gradient(to right, #83a4d4, #b6fbff);
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 20px;}
+
+form {
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+input {
+  margin: 10px 0;
+  padding: 8px;
+  width: 100%;
+}
+
+#steps {
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+
+button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 10px;
+  border: none;
+  width: 100%;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #45a049;
+}

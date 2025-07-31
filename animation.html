@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Animation</title>
+<link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+  <h2>Animating Encryption...</h2>
+  <div id="animateBox" style="font-size: 50px; position: relative;">🔐</div>
+
+  <script>
+    const box = document.getElementById("animateBox");
+    let pos = 0;
+    const maxPos = 300;
+    const interval = 10;
+
+    function animate() {
+      if (pos >= maxPos) {
+        clearInterval(timer);
+        window.location.href = "calculation.html";
+      } else {
+        pos++;
+        box.style.left = pos + "px";
+      }
+    }
+
+    let timer = setInterval(animate, interval);
+  </script>
+</body>
+</html>
